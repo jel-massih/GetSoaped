@@ -1,11 +1,23 @@
 import * as React from "react";
-import { Route } from 'react-router';
 
-import { Layout } from './components/Layout';
-import { Home } from './components/Home/Home';
+import {useUser} from './context/UserContext';
+import {FullPageSpinner} from './components/Shared/FullPageSpinner';
+
+const loadAuthenticatedApp = () => import('./AuthenticatedApp');
+const AuthenticatedApp = React.lazy(loadAuthenticatedApp);
+const UnauthenticatedApp = React.lazy(() => import('./UnAuthenticatedApp'));
 
 export const App = () => {
-    return (<Layout>
-        <Route exact path='/' component={Home} />
-    </Layout>);
+    const user = useUser();
+
+    //Unauthenticated users will still load authenticated app async
+    React.useEffect(() => {
+        loadAuthenticatedApp();
+    }, []);
+
+    return (
+        <React.Suspense fallback={<FullPageSpinner />}>
+            {user ? <AuthenticatedApp /> : <UnauthenticatedApp />}
+        </React.Suspense>
+    );
 };

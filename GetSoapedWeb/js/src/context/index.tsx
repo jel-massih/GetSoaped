@@ -2,10 +2,14 @@ import * as React from "react";
 import {AuthProvider} from './AuthContext'
 import {UserProvider} from './UserContext'
 
-export const AppProviders = (children: any) => {
+interface AppProvidersProps {
+    children: React.ReactNode
+};
+
+export const AppProviders = (props: AppProvidersProps) => {
   return (
     <AuthProvider>
-      <UserProvider>{children}</UserProvider>
+      <UserProvider>{props.children}</UserProvider>
     </AuthProvider>
   )
 }
