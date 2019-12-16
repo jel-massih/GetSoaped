@@ -1,12 +1,9 @@
-using GS.Auth;
-using GS.Auth.Models;
-using GS.Auth.Services;
-using IdentityServer4.Services;
+using System.Collections.Generic;
+using IdentityServer4.Models;
+using IdentityServer4.Test;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -14,44 +11,16 @@ namespace GetSoapedAuth
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<GSIdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
-
-            services.AddIdentity<GSAccount, IdentityRole>()
-                .AddEntityFrameworkStores<GSIdentityDbContext>()
-                .AddDefaultTokenProviders();
-
             services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                .AddOperationalStore(options =>
-                {
-                    options.ConfigureDbContext = builder => builder.UseSqlServer(Configuration.GetConnectionString("Default"));
-                    options.EnableTokenCleanup = true;
-                    options.TokenCleanupInterval = 30;
-                })
-                .AddInMemoryIdentityResources(Config.GetIdentityResources())
-                .AddInMemoryApiResources(Config.GetApiResources())
-                .AddInMemoryClients(Config.GetClients())
-                .AddAspNetIdentity<GSAccount>();
-
-            services.AddTransient<IProfileService, IdentityClaimsProfileService>();
-
-            services.AddCors(options => options.AddPolicy("AllowAll", p => p.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()));
-
-            services.AddControllersWithViews();
-
-            services.AddRazorPages();
+                .AddInMemoryClients(new List<Client>())
+                .AddInMemoryIdentityResources(new List<IdentityResource>())
+                .AddInMemoryApiResources(new List<ApiResource>())
+                .AddTestUsers(new List<TestUser>())
+                .AddDeveloperSigningCredential();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,29 +30,18 @@ namespace GetSoapedAuth
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
 
             app.UseRouting();
 
-            app.UseCors("AllowAll");
-            app.UseIdentityServer();
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
-
-                endpoints.MapRazorPages();
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Hello World!");
+                });
             });
+
+            app.UseIdentityServer();
         }
     }
 }

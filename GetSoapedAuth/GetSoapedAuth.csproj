@@ -5,15 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityServer4.EntityFramework" Version="3.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
+    <PackageReference Include="IdentityServer4" Version="3.0.2" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\GS.Auth\GS.Auth.csproj" />
-  </ItemGroup>
-
-
 
 </Project>
